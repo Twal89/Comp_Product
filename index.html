@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparaison d'Ingrédients</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #000000;
+            --secondary-color: #f5f7fa;
+            --border-color: #e1e8ed;
+            --success-color: #28a745;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Open Sans', sans-serif;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .main-title {
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: 300;
+            letter-spacing: 4px;
+            font-size: 2.5rem;
+            color: #000;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #000;
+            padding-bottom: 1rem;
+        }
+
+        .input-area {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        textarea {
+            min-height: 150px;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 6px !important;
+            resize: vertical;
+        }
+
+        .results-area {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .result-box {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            height: 100%;
+        }
+
+        .result-box h3 {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 300;
+            text-align: center;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .result-content {
+            min-height: 100px;
+            background: var(--secondary-color);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-content ul {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+
+        .result-content ul li {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .result-content ul li:last-child {
+            border-bottom: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 400;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background-color: #333;
+        }
+
+        .btn-copy, .btn-download {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-download {
+            margin-left: 0.5rem;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.98); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .results-area {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-box {
+                margin-bottom: 1rem;
+            }
+
+            .main-title {
+                font-size: 1.8rem;
+                letter-spacing: 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1 class="main-title">Comparaison d'Ingrédients</h1>
+        
+        <div class="input-area">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Liste d'ingrédients 1</label>
+                    <textarea id="ingredients1" class="form-control" placeholder="Collez votre première liste d'ingrédients ici..."></textarea>
+                    <div id="error1" class="error-message">Veuillez remplir ce champ</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Liste d'ingrédients 2</label>
+                    <textarea id="ingredients2" class="form-control" placeholder="Collez votre deuxième liste d'ingrédients ici..."></textarea>
+                    <div id="error2" class="error-message">Veuillez remplir ce champ</div>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <button id="analyzeBtn" class="btn btn-primary me-2">
+                    <i class="fas fa-compare me-2"></i>Analyser
+                </button>
+                <button id="resetBtn" class="btn btn-secondary">
+                    <i class="fas fa-redo me-2"></i>Réinitialiser
+                </button>
+            </div>
+        </div>
+
+        <div class="results-area">
+            <div class="result-box">
+                <h3><i class="fas fa-equals me-2"></i>Ingrédients Communs</h3>
+                <div id="commonResult" class="result-content">
+                    <ul></ul>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-outline-primary btn-copy" data-target="commonResult">
+                        <i class="fas fa-copy me-1"></i>Copier
+                    </button>
+                    <button class="btn btn-outline-primary btn-download" data-target="commonResult">
+                        <i class="fas fa-download me-1"></i>Télécharger
+                    </button>
+                </div>
+            </div>
+
+            <div class="result-box">
+                <h3><i class="fas fa-list-1 me-2"></i>Unique à la Liste 1</h3>
+                <div id="uniqueList1" class="result-content">
+                    <ul></ul>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-outline-primary btn-copy" data-target="uniqueList1">
+                        <i class="fas fa-copy me-1"></i>Copier
+                    </button>
+                    <button class="btn btn-outline-primary btn-download" data-target="uniqueList1">
+                        <i class="fas fa-download me-1"></i>Télécharger
+                    </button>
+                </div>
+            </div>
+
+            <div class="result-box">
+                <h3><i class="fas fa-list-2 me-2"></i>Unique à la Liste 2</h3>
+                <div id="uniqueList2" class="result-content">
+                    <ul></ul>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-outline-primary btn-copy" data-target="uniqueList2">
+                        <i class="fas fa-copy me-1"></i>Copier
+                    </button>
+                    <button class="btn btn-outline-primary btn-download" data-target="uniqueList2">
+                        <i class="fas fa-download me-1"></i>Télécharger
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const ingredients1 = document.getElementById('ingredients1');
+            const ingredients2 = document.getElementById('ingredients2');
+            const error1 = document.getElementById('error1');
+            const error2 = document.getElementById('error2');
+
+            function detectSeparator(text) {
+                const separators = [',', ';', '•', '\n'];
+                const counts = separators.map(sep => ({
+                    separator: sep,
+                    count: (text.match(new RegExp(sep === '\n' ? '\n' : `\\${sep}`, 'g')) || []).length
+                }));
+                
+                const maxCount = Math.max(...counts.map(c => c.count));
+                return counts.find(c => c.count === maxCount)?.separator || ',';
+            }
+
+            function parseIngredients(text, separator) {
+                return text
+                    .split(separator)
+                    .map(item => item.trim().toLowerCase())
+                    .filter(item => item.length > 0);
+            }
+
+            function displayIngredients(ingredients, elementId) {
+                const ul = document.querySelector(`#${elementId} ul`);
+                ul.innerHTML = ingredients.map(item => `<li>${item}</li>`).join('');
+            }
+
+            function compareIngredients() {
+                const text1 = ingredients1.value.trim();
+                const text2 = ingredients2.value.trim();
+
+                // Validation
+                error1.style.display = text1 ? 'none' : 'block';
+                error2.style.display = text2 ? 'none' : 'block';
+                
+                if (!text1 || !text2) {
+                    return;
+                }
+
+                const separator1 = detectSeparator(text1);
+                const separator2 = detectSeparator(text2);
+
+                const list1 = parseIngredients(text1, separator1);
+                const list2 = parseIngredients(text2, separator2);
+
+                const common = list1.filter(item => list2.includes(item));
+                const uniqueToList1 = list1.filter(item => !list2.includes(item));
+                const uniqueToList2 = list2.filter(item => !list1.includes(item));
+
+                displayIngredients(common, 'commonResult');
+                displayIngredients(uniqueToList1, 'uniqueList1');
+                displayIngredients(uniqueToList2, 'uniqueList2');
+            }
+
+            // Analyze button click handler
+            analyzeBtn.addEventListener('click', () => {
+                analyzeBtn.classList.add('pulse');
+                setTimeout(() => {
+                    analyzeBtn.classList.remove('pulse');
+                }, 300);
+                compareIngredients();
+            });
+
+            // Reset button click handler
+            resetBtn.addEventListener('click', () => {
+                ingredients1.value = '';
+                ingredients2.value = '';
+                document.querySelectorAll('.result-content ul').forEach(ul => ul.innerHTML = '');
+                error1.style.display = 'none';
+                error2.style.display = 'none';
+            });
+
+            // Copy buttons
+            document.querySelectorAll('.btn-copy').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = document.getElementById(btn.dataset.target);
+                    const content = Array.from(target.querySelectorAll('li'))
+                        .map(li => li.textContent)
+                        .join('\n');
+                    navigator.clipboard.writeText(content).then(() => {
+                        const originalText = btn.innerHTML;
+                        btn.innerHTML = '<i class="fas fa-check me-1"></i>Copié!';
+                        btn.classList.add('btn-success');
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.classList.remove('btn-success');
+                        }, 2000);
+                    });
+                });
+            });
+
+            // Download buttons
+            document.querySelectorAll('.btn-download').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = document.getElementById(btn.dataset.target);
+                    const content = Array.from(target.querySelectorAll('li'))
+                        .map(li => li.textContent)
+                        .join('\n');
+                    const blob = new Blob([content], { type: 'text/plain' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${btn.dataset.target}.txt`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
